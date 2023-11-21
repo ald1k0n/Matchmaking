@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id          Int        @id @default(autoincrement())
+  nickname    String     @unique
+  password    String
+  steamId     String?
+  userMatch   UserMatch? @relation(fields: [userMatchId], references: [id])
+  userMatchId Int?
+  matchIdA    String?
+  teamA       MatchRoom? @relation(name: "TeamA", fields: [matchIdA], references: [id])
+  matchIdB    String?
+  teamB       MatchRoom? @relation(name: "TeamB", fields: [matchIdB], references: [id])
+}
+
+model UserMatch {
+  id        Int         @id @default(autoincrement())
+  user      User[]
+  matchRoom MatchRoom[]
+}
+
+model MatchRoom {
+  id          String     @id @unique @default(uuid())
+  userMatch   UserMatch? @relation(fields: [userMatchId], references: [id])
+  userMatchId Int?
+  teamA       User[]     @relation(name: "TeamA")
+  teamB       User[]     @relation(name: "TeamB")
+  @@unique([id, userMatchId])
+}
