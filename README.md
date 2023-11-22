@@ -1,6 +1,6 @@
 # The project is creating a matchmaking system
 
-Teach stack used: NestJS, Socket IO, Prisma - in a backend side
+Teach stack used: NestJS, Socket IO, MongoDB - in a backend side
 
 ## Future additions
 
