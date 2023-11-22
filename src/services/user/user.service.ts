@@ -1,17 +1,15 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { Inject, Injectable } from '@nestjs/common';
+import { DB_PROVIDERS } from 'src/constants';
+import { Model } from 'mongoose';
+import { User } from 'src/models';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @Inject(DB_PROVIDERS.USER_MODEL) private readonly userModel: Model<User>,
+  ) {}
 
-  async getMe(id: number) {
-    return await this.prisma.user.findFirst({
-      where: { id },
-      select: {
-        id: true,
-        nickname: true,
-      },
-    });
+  async getMe(id: string) {
+    return await this.userModel.findOne({ _id: id });
   }
 }

@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 export interface IUser {
-  id: number;
+  _id: string;
   socketId: string;
   elo: number;
 }

@@ -1,12 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { IUser } from 'src/types';
-import { PrismaService } from '../prisma/prisma.service';
-
+import { DB_PROVIDERS } from 'src/constants';
+import { Model } from 'mongoose';
+import { MatchRoom } from 'src/models/matchRoom/matchRoom.model';
 @Injectable()
 export class SocketService {
   private queue: IUser[] = [];
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @Inject(DB_PROVIDERS.MATCHROOM_MODEL)
+    private readonly matchRoom: Model<MatchRoom>,
+  ) {}
 
   joinQueue(user: IUser) {
     this.queue.push(user);
@@ -17,6 +21,10 @@ export class SocketService {
         return result;
       }
     }
+    return {
+      event: 'queue',
+      data: `Users in queue ${this.queue.length}`,
+    };
   }
 
   private async createMatch() {
@@ -35,16 +43,9 @@ export class SocketService {
           const team1: IUser[] = shuffledUsers.slice(0, 2);
           const team2: IUser[] = shuffledUsers.slice(2);
 
-          const { id: matchId } = await this.prisma.userMatch.create({
-            data: {
-              user: { connect: matchedUsers.map((user) => ({ id: user.id })) },
-              matchRoom: {
-                create: {
-                  teamA: { connect: team1.map((user) => ({ id: user.id })) },
-                  teamB: { connect: team2.map((user) => ({ id: user.id })) },
-                },
-              },
-            },
+          const matchRoom = await this.matchRoom.create({
+            teamA: team1.map((u) => u._id),
+            teamB: team2.map((u) => u._id),
           });
 
           return {
@@ -53,7 +54,7 @@ export class SocketService {
               team1,
               team2,
               allUsers: matchedUsers,
-              matchId,
+              matchId: matchRoom._id,
             },
           };
         }
@@ -63,7 +64,6 @@ export class SocketService {
 
   private removeFromQueue(usersToRemove: IUser[]) {
     this.queue = this.queue.filter((user) => !usersToRemove.includes(user));
-    console.log(this.queue, 'queue');
   }
 
   private shuffleArray(array: any[]) {

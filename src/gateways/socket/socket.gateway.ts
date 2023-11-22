@@ -37,9 +37,9 @@ export class SocketGateway {
     const { event, data } = await this.socketService.joinQueue({
       socketId: client.id,
       elo: body.elo,
-      id: body.id,
+      _id: body._id,
     });
-
+    console.log(event, 'event');
     //@ts-ignore
     data.allUsers?.forEach((user: IUser) => {
       this.server

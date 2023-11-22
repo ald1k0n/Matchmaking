@@ -2,47 +2,37 @@ import {
   ForbiddenException,
   Injectable,
   UnauthorizedException,
+  Inject,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
+import { DB_PROVIDERS } from 'src/constants';
+import { User } from 'src/models';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly prisma: PrismaService,
+    @Inject(DB_PROVIDERS.USER_MODEL) private readonly userModel: Model<User>,
+
     private readonly jwt: JwtService,
   ) {}
 
-  async createUser(data: Prisma.UserCreateInput) {
-    const candidate = await this.prisma.user.findFirst({
-      where: {
-        nickname: data.nickname,
-      },
-    });
+  async createUser(data: User) {
+    const candidate = await this.userModel.findOne({ nickname: data.nickname });
 
     if (candidate) throw new ForbiddenException('User already exists');
 
-    const user = await this.prisma.user.create({
-      data: {
-        ...data,
-        password: bcrypt.hashSync(data.password, 7),
-      },
-      select: {
-        id: true,
-        nickname: true,
-      },
+    const user = await this.userModel.create({
+      ...data,
+      password: bcrypt.hashSync(data.password, 7),
     });
+
     return user;
   }
 
-  async authorize(data: Prisma.UserCreateInput) {
-    const candidate = await this.prisma.user.findFirst({
-      where: {
-        nickname: data.nickname,
-      },
-    });
+  async authorize(data: User) {
+    const candidate = await this.userModel.findOne({ nickname: data.nickname });
 
     if (!candidate) throw new UnauthorizedException('User not found');
     if (!bcrypt.compareSync(data.password, candidate.password))

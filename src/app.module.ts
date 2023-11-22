@@ -1,18 +1,19 @@
 import { Module } from '@nestjs/common';
-import { SocketGateway } from './gateways/socket/socket.gateway';
-import { SocketService } from './services/socket/socket.service';
 import { AuthModule } from './modules/auth/auth.module';
-import { PrismaModule } from './modules/prisma/prisma.module';
-import { PrismaService } from './services/prisma/prisma.service';
-import { AuthService } from './services/auth/auth.service';
 import { AuthController } from './controllers/auth/auth.controller';
 import { UserService } from './services/user/user.service';
 import { UserController } from './controllers/user/user.controller';
-import { UserModule } from './modules/user/user.module';
+import { CoreModule } from './modules/core/core.module';
+import { MongoModule } from './modules/mongo/mongo.module';
+import { userProvider } from './models';
+import { QueueModule } from './modules/queue/queue.module';
+import { MatchRoomModule } from './modules/match-room/match-room.module';
+import { MatchRoomService } from './services/match-room/match-room.service';
+import { MatchRoomController } from './controllers/match-room/match-room.controller';
 
 @Module({
-  imports: [AuthModule, PrismaModule, UserModule],
-  controllers: [AuthController, UserController],
-  providers: [SocketGateway, SocketService, PrismaService, AuthService, UserService],
+  imports: [CoreModule, AuthModule, MongoModule, QueueModule, MatchRoomModule],
+  controllers: [UserController, AuthController, MatchRoomController],
+  providers: [UserService, ...userProvider, MatchRoomService],
 })
 export class AppModule {}
