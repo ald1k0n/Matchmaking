@@ -11,7 +11,7 @@ export class MatchRoomService {
     @Inject(DB_PROVIDERS.USER_MODEL) private user: Model<User>,
   ) {}
 
-  async getMyMatches(_id: string) {
+  async getMatches(_id: string) {
     const matches = await this.matchRoom
       .find({
         $or: [

@@ -16,11 +16,11 @@ export const matchRoomSchema = new mongoose.Schema({
       required: true,
     },
   ],
-  differenceA: Number,
-  differenceB: Number,
+  difference: Number,
 });
 
 export interface MatchRoom extends mongoose.Document {
   readonly teamA: string;
   readonly teamB: string;
+  readonly difference: string;
 }

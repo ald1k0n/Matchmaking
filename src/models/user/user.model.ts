@@ -10,9 +10,6 @@ export const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  steamId: {
-    type: String,
-  },
   elo: {
     type: Number,
     default: 800,

@@ -43,9 +43,14 @@ export class SocketService {
           const team1: IUser[] = shuffledUsers.slice(0, 2);
           const team2: IUser[] = shuffledUsers.slice(2);
 
+          const maxEloTeam1 = Math.max(...team1.map((user) => user.elo));
+          const maxEloTeam2 = Math.max(...team2.map((user) => user.elo));
+          const difference = Math.abs(maxEloTeam1 - maxEloTeam2);
+
           const matchRoom = await this.matchRoom.create({
             teamA: team1.map((u) => u._id),
             teamB: team2.map((u) => u._id),
+            difference,
           });
 
           return {
