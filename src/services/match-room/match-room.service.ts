@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { DB_PROVIDERS } from 'src/constants';
 import { User } from 'src/models';
@@ -22,5 +22,30 @@ export class MatchRoomService {
       .populate('teamA', 'nickname')
       .populate('teamB', 'nickname');
     return matches;
+  }
+
+  async getMatch(matchId: string) {
+    const match = await this.matchRoom
+      .findOne({
+        _id: matchId,
+      })
+      .populate('teamA', 'nickname')
+      .populate('teamB', 'nickname');
+    if (!match) throw new NotFoundException('Match not found');
+    return match;
+  }
+
+  async setMatchResult(_id: string, winner: string) {
+    const updatedMatch = await this.matchRoom.updateOne(
+      { _id },
+      {
+        $set: {
+          winner,
+        },
+      },
+    );
+    if (!updatedMatch) throw new NotFoundException('Match not found');
+
+    return updatedMatch;
   }
 }
