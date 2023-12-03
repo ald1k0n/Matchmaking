@@ -3,17 +3,23 @@ import { IUser } from 'src/types';
 import { DB_PROVIDERS } from 'src/constants';
 import { Model } from 'mongoose';
 import { MatchRoom } from 'src/models/matchRoom/matchRoom.model';
-import { User } from 'src/models';
+
+interface Queue {
+  _id: string;
+  elo: number;
+  socketId: string;
+}
+
 @Injectable()
 export class SocketService {
-  private queue: User[] = [];
+  private queue: Queue[] = [];
 
   constructor(
     @Inject(DB_PROVIDERS.MATCHROOM_MODEL)
     private readonly matchRoom: Model<MatchRoom>,
   ) {}
 
-  joinQueue(user: User) {
+  joinQueue(user: { _id: string; socketId: string; elo: number }) {
     this.queue.push(user);
 
     if (this.queue.length >= 4) {
@@ -29,7 +35,7 @@ export class SocketService {
   }
 
   private async createMatch() {
-    const matchedUsers: User[] = [];
+    const matchedUsers: Queue[] = [];
 
     for (let i = 0; i < this.queue.length - 1; i++) {
       if (Math.abs(this.queue[i].elo - this.queue[i + 1].elo) <= 100) {
@@ -68,7 +74,7 @@ export class SocketService {
     }
   }
 
-  private removeFromQueue(usersToRemove: User[]) {
+  private removeFromQueue(usersToRemove: Queue[]) {
     this.queue = this.queue.filter((user) => !usersToRemove.includes(user));
   }
 

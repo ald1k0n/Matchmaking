@@ -36,8 +36,8 @@ export class SocketGateway {
   ) {
     const { event, data } = await this.socketService.joinQueue({
       socketId: client.id,
-      elo: body.elo,
       _id: body._id,
+      elo: body.elo,
     });
     console.log(event, 'event');
     //@ts-ignore
